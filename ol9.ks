@@ -51,7 +51,7 @@ selinux --enforcing
 timezone Europe/London
 
 ### Partitioning
-autopart
+autopart --type=lvm
 
 ### Modifies the default set of services that will run under the default runlevel.
 services --enabled=NetworkManager,sshd
