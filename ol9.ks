@@ -14,7 +14,7 @@ text
 eula --agreed
 
 ### Sets the language to use during installation and the default language to use on the installed system.
-lang en_GB.UTF-8
+lang en_GB
 
 ### Sets the default keyboard type for the system.
 keyboard uk
