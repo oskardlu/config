@@ -26,13 +26,6 @@ keyboard uk
 ### --noipv6	  disable IPv6 on this device
 network --onboot=yes --device=eth0 --bootproto=dhcp --noipv6
 
-### Lock the root account.
-rootpw --lock
-
-### The selected profile will restrict root login.
-### Add a user that can login and escalate privileges.
-user --name=johndoe --iscrypted --password=encryptedpassword --groups=wheel
-
 ### Configure firewall settings for the system.
 ### --enabled	reject incoming connections that are not in response to outbound requests
 ### --ssh		allow sshd service through the firewall
@@ -74,7 +67,6 @@ dnf install -y oracle-epel-release-el9
 dnf makecache
 dnf install -y sudo open-vm-tools perl
 dnf install -y additional_packages
-echo "johndoe ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers.d/johndoe
 sed -i "s/^.*requiretty/#Defaults requiretty/" /etc/sudoers
 %end
 
