@@ -57,3 +57,6 @@ skipx
 # Post-installation commands.
 %post
 # Reboot after the installation is complete.
+reboot
+%end
+
