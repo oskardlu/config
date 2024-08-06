@@ -3,60 +3,78 @@
 
 # Oracle Linux Server 9
 
-# Installs from the first attached CD-ROM/DVD on the system.
+### Installs from the first attached CD-ROM/DVD on the system.
 cdrom
 
-# Performs the kickstart installation in text mode.
+### Performs the kickstart installation in text mode.
+### By default, kickstart installations are performed in graphical mode.
 text
 
-# Accepts the End User License Agreement.
+### Accepts the End User License Agreement.
 eula --agreed
 
-# Sets the language to use during installation and the default language to use on the installed system.
+### Sets the language to use during installation and the default language to use on the installed system.
 lang en_GB.UTF-8
 
-# Sets the default keyboard type for the system.
+### Sets the default keyboard type for the system.
 keyboard uk
 
-# Configure network information for target system and activate network devices in the installer environment
-network  --bootproto=dhcp --device=eth0 --onboot=on  --hostname=ol6-112-server.localdomain
+### Configure network information for target system and activate network devices in the installer environment (optional)
+### --onboot	  enable device at a boot time
+### --device	  device to be activated and / or configured with the network command
+### --bootproto	  method to obtain networking configuration for device (default dhcp)
+### --noipv6	  disable IPv6 on this device
+network --onboot=yes --device=eth0 --bootproto=dhcp --noipv6
 
-# Lock the root account.
+### Lock the root account.
 rootpw --lock
 
-# Add a user that can login and escalate privileges.
-user --name=builduser --iscrypted --password=$1$USEhgGL3$288iZJqkskW2pu.8woUF10 --groups=wheel
+### The selected profile will restrict root login.
+### Add a user that can login and escalate privileges.
+user --name=johndoe --iscrypted --password=encryptedpassword --groups=wheel
 
-# Configure firewall settings for the system.
+### Configure firewall settings for the system.
+### --enabled	reject incoming connections that are not in response to outbound requests
+### --ssh		allow sshd service through the firewall
 firewall --enabled --ssh
 
-# Sets up the authentication options for the system.
+### Sets up the authentication options for the system.
+### The SSDD profile sets sha512 to hash passwords. Passwords are shadowed by default
+### See the manual page for authselect-profile for a complete list of possible options.
 authselect select sssd
 
-# Sets the state of SELinux on the installed system.
+### Sets the state of SELinux on the installed system.
+### Defaults to enforcing.
 selinux --enforcing
 
-# Sets the system time zone.
+### Sets the system time zone.
 timezone Europe/London
 
-# Partitioning
+### Partitioning
 autopart
 
-# Modifies the default set of services that will run under the default runlevel.
+### Modifies the default set of services that will run under the default runlevel.
 services --enabled=NetworkManager,sshd
 
-# Do not configure X on the installed system.
+### Do not configure X on the installed system.
 skipx
 
-# Packages selection.
+### Packages selection.
 %packages --ignoremissing --excludedocs
-@base
 @core
+-iwl*firmware
 %end
 
-# Post-installation commands.
+### Post-installation commands.
 %post
-# Reboot after the installation is complete.
-reboot
+dnf install -y oracle-epel-release-el9
+dnf makecache
+dnf install -y sudo open-vm-tools perl
+dnf install -y additional_packages
+echo "johndoe ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers.d/johndoe
+sed -i "s/^.*requiretty/#Defaults requiretty/" /etc/sudoers
 %end
 
+### Reboot after the installation is complete.
+### --eject attempt to eject the media before rebooting.
+reboot --eject
