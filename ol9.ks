@@ -1,53 +1,59 @@
-#platform=x86, AMD64, or Intel EM64T
-#version=DEVEL
-# Firewall configuration
-firewall --enabled --ssh
-# Install OS instead of upgrade
-install
-# Use CDROM installation media
+# Copyright 2023-2024 Broadcom. All rights reserved.
+# SPDX-License-Identifier: BSD-2
+
+# Oracle Linux Server 9
+
+# Installs from the first attached CD-ROM/DVD on the system.
 cdrom
-# Root password
-rootpw --iscrypted $1$USEhgGL3$288iZJqkskW2pu.8woUF10
-# System authorization information
-auth  --useshadow  --passalgo=sha512
-# Use text install
+
+# Performs the kickstart installation in text mode.
 text
-# Run the Setup Agent on first boot
-firstboot --enable
-# System keyboard
-keyboard uk
-# System language
+
+# Accepts the End User License Agreement.
+eula --agreed
+
+# Sets the language to use during installation and the default language to use on the installed system.
 lang en_GB.UTF-8
-# SELinux configuration
-selinux --permissive
-# Installation logging level
-logging --level=info
-# Reboot after installation
-reboot
-# System timezone
-timezone  Europe/London
-# Network information
-network  --bootproto=static --device=eth0 --gateway=192.168.0.1 --ip=192.169.0.2 --nameserver=192.168.0.4 --netmask=255.255.255.0 --onboot=on  --hostname=ol6-112-server.localdomain
-# System bootloader configuration
-bootloader --location=mbr
-# Clear the Master Boot Record
-zerombr
-# Partition clearing information
-clearpart --all --initlabel
-# Disk partitioning information
-part / --fstype="ext4" --size=10240
-part swap --fstype="swap" --size=2048
-part /home --fstype="ext4" --size=10240
-part /var --fstype="ext4" --size=4096
-part /tmp --fstype="ext4" --size=2048
-# System bootloader configuration
-bootloader --append=" crashkernel=auto" --location=mbr --boot-drive=sda
-# Package selection
-%packages
+
+# Sets the default keyboard type for the system.
+keyboard uk
+
+# Configure network information for target system and activate network devices in the installer environment
+network  --bootproto=dhcp --device=eth0 --onboot=on  --hostname=ol6-112-server.localdomain
+
+# Lock the root account.
+rootpw --lock
+
+# Add a user that can login and escalate privileges.
+user --name=builduser --iscrypted --password=$1$USEhgGL3$288iZJqkskW2pu.8woUF10 --groups=wheel
+
+# Configure firewall settings for the system.
+firewall --enabled --ssh
+
+# Sets up the authentication options for the system.
+authselect select sssd
+
+# Sets the state of SELinux on the installed system.
+selinux --enforcing
+
+# Sets the system time zone.
+timezone Europe/London
+
+# Partitioning
+autopart
+
+# Modifies the default set of services that will run under the default runlevel.
+services --enabled=NetworkManager,sshd
+
+# Do not configure X on the installed system.
+skipx
+
+# Packages selection.
+%packages --ignoremissing --excludedocs
 @base
 @core
 %end
-# Post installation script
+
+# Post-installation commands.
 %post
-echo 'Hello, World!'
-%end
+# Reboot after the installation is complete.
